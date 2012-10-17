@@ -434,8 +434,10 @@ case "$VTYPE" in
 	errors)		VVARS="accept_fail,backend_busy,backend_fail,backend_unhealthy,dir_dns_cache_full,dir_dns_failed,esi_errors,esi_warnings,fetch_bad,fetch_failed,losthdr,n_lru_nuked,n_objoverflow,n_wrk_drop,n_wrk_failed,SMA.s0.c_fail,SMA.Transient.c_fail";;
 	totals)		VVARS="s_req,s_sess,s_pass,s_pipe,s_fetch";;
 	objects)	VVARS="n_object,n_objectcore,n_objecthead";;
-#	structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,vmods";;
-## n_waitinglist broken in 3.0.2: does not decrease
+	## n_waitinglist broken in 3.0.2:  never decreases
+	## TODO: autodetect varnish version
+	## use the following line for varnish 3.0.2:
+	#structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,vmods";;
 	structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,n_waitinglist,vmods";;
 	objmove)	VVARS="n_expired,n_lru_nuked,n_lru_moved";;
 	memory)		VVARS="SMA.s0.g_bytes,SMA.Transient.g_bytes,sms_nbytes";;
