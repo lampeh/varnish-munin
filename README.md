@@ -8,11 +8,13 @@ varnishstat_
 -------------
 
 Plugin config:
+
     [varnishstat_*]
     group varnishlog
 
 
 Symlinks:
+
     varnishstat_cache -> varnishstat_
     varnishstat_cachepct -> varnishstat_
     varnishstat_client -> varnishstat_
