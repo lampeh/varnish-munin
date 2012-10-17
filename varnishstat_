@@ -1,0 +1,448 @@
+#!/bin/sh
+
+# set -x
+
+VTYPE=`basename $0 | sed 's/^varnishstat_//g'`
+
+VSTAT=/usr/bin/varnishstat
+
+[ -z "$VTYPE" ] && [ -n "$2" ] && VTYPE=$2
+[ -z "$VTYPE" ] && exit 0;
+
+if [ "$1" = "autoconf" ]; then
+	echo no
+	exit 1
+
+elif [ "$1" = "config" ]; then
+	case "$VTYPE" in
+		client)
+			cat <<-_EOF_
+				graph_title Varnish - Client stats
+				graph_category varnish
+				graph_vlabel client events / \${graph_period}
+				client_conn.label Client connections accepted
+				client_conn.draw LINE1
+				client_conn.type DERIVE
+				client_conn.min 0
+				client_req.label Client requests received
+				client_req.draw LINE1
+				client_req.type DERIVE
+				client_req.min 0
+				client_drop.label Connection dropped, no sess/wrk
+				client_drop.draw LINE1
+				client_drop.type DERIVE
+				client_drop.min 0
+				client_drop_late.label Connection dropped late
+				client_drop_late.draw LINE1
+				client_drop_late.type DERIVE
+				client_drop_late.min 0
+			_EOF_
+			;;
+
+		cache)
+			cat <<-_EOF_
+				graph_title Varnish - Cache stats
+				graph_category varnish
+				graph_vlabel cache events / \${graph_period}
+				cache_hit.label Cache hits
+				cache_hit.draw AREA
+				cache_hit.type DERIVE
+				cache_hit.min 0
+				cache_miss.label Cache misses
+				cache_miss.draw STACK
+				cache_miss.type DERIVE
+				cache_miss.min 0
+				cache_hitpass.label Cache hits for pass
+				cache_hitpass.draw STACK
+				cache_hitpass.type DERIVE
+				cache_hitpass.min 0
+				client_req.label Client requests received
+				client_req.draw LINE1
+				client_req.type DERIVE
+				client_req.min 0
+				backend_req.label Backend requests sent
+				backend_req.draw LINE2
+				backend_req.type DERIVE
+				backend_req.min 0
+			_EOF_
+			;;
+
+		cachepct)
+			cat <<-_EOF_
+				graph_title Varnish - Cache hits
+				graph_category varnish
+				graph_vlabel %
+				graph_args -u 100 --rigid
+				client_req.graph off
+				client_req.label Client requests received
+				client_req.type DERIVE
+				client_req.min 0
+				cache_hit.label Cache hits
+				cache_hit.draw AREA
+				cache_hit.type DERIVE
+				cache_hit.min 0
+				cache_hit.cdef cache_hit,0,client_req,NE,client_req,UNKN,IF,/,100,*
+				cache_hitpass.label Cache hits for pass
+				cache_hitpass.draw STACK
+				cache_hitpass.type DERIVE
+				cache_hitpass.min 0
+				cache_hitpass.cdef cache_hitpass,0,client_req,NE,client_req,UNKN,IF,/,100,*
+				cache_miss.label Cache misses
+				cache_miss.draw STACK
+				cache_miss.type DERIVE
+				cache_miss.min 0
+				cache_miss.cdef cache_miss,0,client_req,NE,client_req,UNKN,IF,/,100,*
+			_EOF_
+			;;
+
+		threads)
+			cat <<-_EOF_
+				graph_title Varnish - Threads
+				graph_category varnish
+				n_wrk.label worker threads
+				n_wrk.draw LINE1
+				n_wrk.type GAUGE
+				n_wrk.min 0
+				n_wrk_create.label worker threads created
+				n_wrk_create.draw LINE1
+				n_wrk_create.type DERIVE
+				n_wrk_create.min 0
+				n_wrk_failed.label worker threads not created
+				n_wrk_failed.draw LINE1
+				n_wrk_failed.type DERIVE
+				n_wrk_failed.min 0
+				n_wrk_max.label worker threads limited
+				n_wrk_max.draw LINE1
+				n_wrk_max.type DERIVE
+				n_wrk_max.min 0
+				n_wrk_queued.label queued work requests
+				n_wrk_queued.draw LINE1
+				n_wrk_queued.type DERIVE
+				n_wrk_queued.min 0
+				n_wrk_drop.label dropped work requests
+				n_wrk_drop.draw LINE1
+				n_wrk_drop.type DERIVE
+				n_wrk_drop.min 0
+				n_wrk_lqueue.label work request queue length
+				n_wrk_lqueue.draw LINE1
+				n_wrk_lqueue.type GAUGE
+				n_wrk_lqueue.min 0
+			_EOF_
+			;;
+
+		errors)
+			cat <<-_EOF_
+				graph_title Varnish - Errors
+				graph_category varnish
+				graph_vlabel errors / \${graph_period}
+				accept_fail.label Accept failures
+				accept_fail.draw LINE1
+				accept_fail.type DERIVE
+				accept_fail.min 0
+				backend_busy.label Backend conn. too many
+				backend_busy.draw LINE1
+				backend_busy.type DERIVE
+				backend_busy.min 0
+				backend_fail.label Backend conn. failures
+				backend_fail.draw LINE1
+				backend_fail.type DERIVE
+				backend_fail.min 0
+				backend_unhealthy.label Backend conn. not attempted
+				backend_unhealthy.draw LINE1
+				backend_unhealthy.type DERIVE
+				backend_unhealthy.min 0
+				dir_dns_cache_full.label DNS director full dnscache
+				dir_dns_cache_full.draw LINE1
+				dir_dns_cache_full.type DERIVE
+				dir_dns_cache_full.min 0
+				dir_dns_failed.label DNS director failed lookups
+				dir_dns_failed.draw LINE1
+				dir_dns_failed.type DERIVE
+				dir_dns_failed.min 0
+				esi_errors.label ESI parse errors
+				esi_errors.draw LINE1
+				esi_errors.type DERIVE
+				esi_errors.min 0
+				esi_warnings.label ESI parse warnings
+				esi_warnings.draw LINE1
+				esi_warnings.type DERIVE
+				esi_warnings.min 0
+				fetch_bad.label Fetch had bad headers
+				fetch_bad.draw LINE1
+				fetch_bad.type DERIVE
+				fetch_bad.min 0
+				fetch_failed.label Fetch failed
+				fetch_failed.draw LINE1
+				fetch_failed.type DERIVE
+				fetch_failed.min 0
+				losthdr.label HTTP header overflows
+				losthdr.draw LINE1
+				losthdr.type DERIVE
+				losthdr.min 0
+				n_lru_nuked.label LRU nuked objects
+				n_lru_nuked.draw LINE1
+				n_lru_nuked.type DERIVE
+				n_lru_nuked.min 0
+				n_objoverflow.label Objects overflowing workspace
+				n_objoverflow.draw LINE1
+				n_objoverflow.type DERIVE
+				n_objoverflow.min 0
+				n_wrk_drop.label dropped work requests
+				n_wrk_drop.draw LINE1
+				n_wrk_drop.type DERIVE
+				n_wrk_drop.min 0
+				n_wrk_failed.label worker threads not created
+				n_wrk_failed.draw LINE1
+				n_wrk_failed.type DERIVE
+				n_wrk_failed.min 0
+				SMA_s0_c_fail.label Storage_0 Allocator failures
+				SMA_s0_c_fail.draw LINE1
+				SMA_s0_c_fail.type DERIVE
+				SMA_s0_c_fail.min 0
+				SMA_Transient_c_fail.label Transient Allocator failures
+				SMA_Transient_c_fail.draw LINE1
+				SMA_Transient_c_fail.type DERIVE
+				SMA_Transient_c_fail.min 0
+			_EOF_
+			;;
+
+		totals)
+			cat <<-_EOF_
+				graph_title Varnish - Totals
+				graph_category varnish
+				graph_vlabel events / \${graph_period}
+				s_req.label Total Requests
+				s_req.draw LINE1
+				s_req.type DERIVE
+				s_req.min 0
+				s_sess.label Total Sessions
+				s_sess.draw LINE1
+				s_sess.type DERIVE
+				s_sess.min 0
+				s_pass.label Total Pass
+				s_pass.draw LINE1
+				s_pass.type DERIVE
+				s_pass.min 0
+				s_fetch.label Total Fetch
+				s_fetch.draw LINE1
+				s_fetch.type DERIVE
+				s_fetch.min 0
+				s_pipe.label Total Pipe
+				s_pipe.draw LINE1
+				s_pipe.type DERIVE
+				s_pipe.min 0
+			_EOF_
+			;;
+
+		objects)
+			cat <<-_EOF_
+				graph_title Varnish - Objects
+				graph_category varnish
+				graph_vlabel cached objects
+				n_object.label struct object
+				n_object.draw LINE1
+				n_object.type GAUGE
+				n_object.min 0
+				n_objectcore.label struct objectcore
+				n_objectcore.draw LINE1
+				n_objectcore.type GAUGE
+				n_objectcore.min 0
+				n_objecthead.label struct objecthead
+				n_objecthead.draw LINE1
+				n_objecthead.type GAUGE
+				n_objecthead.min 0
+			_EOF_
+			;;
+
+		structs)
+			cat <<-_EOF_
+				graph_title Varnish - Other structs
+				graph_category varnish
+				graph_vlabel structs in use
+				n_sess.label struct sess
+				n_sess.draw LINE1
+				n_sess.type GAUGE
+				n_sess.min 0
+				n_sess_mem.label struct sess_mem
+				n_sess_mem.draw LINE1
+				n_sess_mem.type GAUGE
+				n_sess_mem.min 0
+				n_vbc.label struct vbc
+				n_vbc.draw LINE1
+				n_vbc.type GAUGE
+				n_vbc.min 0
+				n_waitinglist.label struct waitinglist
+				n_waitinglist.draw LINE1
+				n_waitinglist.type GAUGE
+				n_waitinglist.min 0
+				n_vampireobject.label unsurrected objects
+				n_vampireobject.draw LINE1
+				n_vampireobject.type GAUGE
+				n_vampireobject.min 0
+				n_ban.label total active bans
+				n_ban.draw LINE1
+				n_ban.type GAUGE
+				n_ban.min 0
+				n_vcl.label vcl total
+				n_vcl.draw LINE1
+				n_vcl.type GAUGE
+				n_vcl.min 0
+				n_vcl_avail.label vcl available
+				n_vcl_avail.draw LINE1
+				n_vcl_avail.type GAUGE
+				n_vcl_avail.min 0
+				n_vcl_discard.label vcl discarded
+				n_vcl_discard.draw LINE1
+				n_vcl_discard.type GAUGE
+				n_vcl_discard.min 0
+				vmods.label vmods
+				vmods.draw LINE1
+				vmods.type GAUGE
+				vmods.min 0
+				n_backend.label backends
+				n_backend.draw LINE1
+				n_backend.type GAUGE
+				n_backend.min 0
+			_EOF_
+			;;
+
+		objmove)
+			cat <<-_EOF_
+				graph_title Varnish - Object movement
+				graph_category varnish
+				graph_vlabel moved objects / \${graph_period}
+				n_expired.label expired objects
+				n_expired.draw LINE1
+				n_expired.type DERIVE
+				n_expired.min 0
+				n_lru_nuked.label LRU nuked objects
+				n_lru_nuked.draw LINE1
+				n_lru_nuked.type DERIVE
+				n_lru_nuked.min 0
+				n_lru_moved.label LRU moved objects
+				n_lru_moved.draw LINE1
+				n_lru_moved.type DERIVE
+				n_lru_moved.min 0
+			_EOF_
+			;;
+
+		memory)
+			cat <<-_EOF_
+				graph_title Varnish - Memory usage
+				graph_category varnish
+				graph_vlabel bytes
+				SMA_s0_g_bytes.label Storage_0 Bytes in use
+				SMA_s0_g_bytes.draw LINE1
+				SMA_s0_g_bytes.type GAUGE
+				SMA_s0_g_bytes.min 0
+				SMA_Transient_g_bytes.label Transient Storage Bytes in use
+				SMA_Transient_g_bytes.draw LINE1
+				SMA_Transient_g_bytes.type GAUGE
+				SMA_Transient_g_bytes.min 0
+				sms_nbytes.label SMS Bytes in use
+				sms_nbytes.draw LINE1
+				sms_nbytes.type GAUGE
+				sms_nbytes.min 0
+			_EOF_
+			;;
+
+		memmove)
+			cat <<-_EOF_
+				graph_title Varnish - Memory movement
+				graph_category varnish
+				graph_vlabel bytes / \${graph_period}
+				SMA_s0_c_bytes.label Storage_0 Bytes allocated
+				SMA_s0_c_bytes.draw LINE1
+				SMA_s0_c_bytes.type DERIVE
+				SMA_s0_c_bytes.min 0
+				SMA_s0_c_freed.label Storage_0 Bytes freed
+				SMA_s0_c_freed.draw LINE1
+				SMA_s0_c_freed.type DERIVE
+				SMA_s0_c_freed.min 0
+				SMA_Transient_c_bytes.label Transient Storage Bytes allocated
+				SMA_Transient_c_bytes.draw LINE1
+				SMA_Transient_c_bytes.type DERIVE
+				SMA_Transient_c_bytes.min 0
+				SMA_Transient_c_freed.label Transient Storage Bytes freed
+				SMA_Transient_c_freed.draw LINE1
+				SMA_Transient_c_freed.type DERIVE
+				SMA_Transient_c_freed.min 0
+				sms_balloc.label SMS bytes allocated
+				sms_balloc.draw LINE1
+				sms_balloc.type DERIVE
+				sms_balloc.min 0
+				sms_bfree.label SMS bytes freed
+				sms_bfree.draw LINE1
+				sms_bfree.type DERIVE
+				sms_bfree.min 0
+			_EOF_
+			;;
+
+		memalloc)
+			cat <<-_EOF_
+				graph_title Varnish - Memory allocation
+				graph_category varnish
+				graph_vlabel allocator events / \${graph_period}
+				SMA_s0_c_req.label Storage_0 Allocator requests
+				SMA_s0_c_req.draw LINE1
+				SMA_s0_c_req.type DERIVE
+				SMA_s0_c_req.min 0
+				SMA_Transient_c_req.label Transient Allocator requests
+				SMA_Transient_c_req.draw LINE1
+				SMA_Transient_c_req.type DERIVE
+				SMA_Transient_c_req.min 0
+				sms_nreq.label SMS Allocator requests
+				sms_nreq.draw LINE1
+				sms_nreq.type DERIVE
+				sms_nreq.min 0
+				SMA_s0_c_fail.label Storage_0 Allocator failures
+				SMA_s0_c_fail.draw LINE1
+				SMA_s0_c_fail.type DERIVE
+				SMA_s0_c_fail.min 0
+				SMA_Transient_c_fail.label Transient Allocator failures
+				SMA_Transient_c_fail.draw LINE1
+				SMA_Transient_c_fail.type DERIVE
+				SMA_Transient_c_fail.min 0
+			_EOF_
+			;;
+
+		*)
+			cat <<-_EOF_
+				graph_title Varnish - $VTYPE
+				graph_category varnish
+				$VVARS.label $VVAR
+				$VVARS.draw LINE1
+				$VVARS.type GAUGE
+				dummy.label None
+				dummy.graph no
+				dummy.type GAUGE
+			_EOF_
+			;;
+	esac
+	exit 0
+
+elif [ "$1" ]; then
+        exit 0;
+
+fi
+
+case "$VTYPE" in
+	client)		VVARS="client_conn,client_req,client_drop,client_drop_late";;
+	cache)		VVARS="cache_hit,cache_miss,cache_hitpass,client_req,backend_req";;
+	cachepct)	VVARS="cache_hit,cache_miss,cache_hitpass,client_req";;
+	threads)	VVARS="n_wrk,n_wrk_create,n_wrk_failed,n_wrk_max,n_wrk_queued,n_wrk_drop,n_wrk_lqueue";;
+	errors)		VVARS="accept_fail,backend_busy,backend_fail,backend_unhealthy,dir_dns_cache_full,dir_dns_failed,esi_errors,esi_warnings,fetch_bad,fetch_failed,losthdr,n_lru_nuked,n_objoverflow,n_wrk_drop,n_wrk_failed,SMA.s0.c_fail,SMA.Transient.c_fail";;
+	totals)		VVARS="s_req,s_sess,s_pass,s_pipe,s_fetch";;
+	objects)	VVARS="n_object,n_objectcore,n_objecthead";;
+#	structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,vmods";;
+## n_waitinglist broken in 3.0.2: does not decrease
+	structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,n_waitinglist,vmods";;
+	objmove)	VVARS="n_expired,n_lru_nuked,n_lru_moved";;
+	memory)		VVARS="SMA.s0.g_bytes,SMA.Transient.g_bytes,sms_nbytes";;
+	memmove)	VVARS="SMA.s0.c_bytes,SMA.s0.c_freed,SMA.Transient.c_bytes,SMA.Transient.c_freed,sms_balloc,sms_bfree";;
+	memalloc)	VVARS="SMA.s0.c_req,SMA.s0.c_fail,SMA.Transient.c_req,SMA.Transient.c_fail,sms_nreq";;
+	*)			VVARS="$VTYPE";;
+esac
+
+$VSTAT -1 -f $VVARS |sed -e 's/\([^ \t.]*\)\./\1_/g;s/^\([^ \t]*\)[ \t]*\([0-9]*\)[ \t]*.*/\1.value \2/;t;d'
+exit 0
