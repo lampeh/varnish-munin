@@ -1,7 +1,7 @@
 varnish-munin
 =============
 
-Munin plugins vor varnish
+Munin plugins for varnish
 
 
 varnishstat_
