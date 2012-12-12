@@ -283,6 +283,10 @@ elif [ "$1" = "config" ]; then
 				n_ban.draw LINE1
 				n_ban.type GAUGE
 				n_ban.min 0
+				n_ban_gone.label total gone bans
+				n_ban_gone.draw LINE1
+				n_ban_gone.type GAUGE
+				n_ban_gone.min 0
 				n_vcl.label vcl total
 				n_vcl.draw LINE1
 				n_vcl.type GAUGE
@@ -455,8 +459,8 @@ case "$VTYPE" in
 	## n_waitinglist broken in 3.0.2:  never decreases
 	## TODO: autodetect varnish version
 	## use the following line for varnish 3.0.2:
-	#structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,vmods";;
-	structs)	VVARS="n_backend,n_ban,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,n_waitinglist,vmods";;
+	#structs)	VVARS="n_backend,n_ban,n_ban_gone,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,vmods";;
+	structs)	VVARS="n_backend,n_ban,n_ban_gone,n_sess,n_sess_mem,n_vampireobject,n_vbc,n_vcl,n_vcl_avail,n_vcl_discard,n_waitinglist,vmods";;
 	objmove)	VVARS="n_expired,n_lru_nuked,n_lru_moved";;
 	memory)		VVARS="SMA.s0.g_bytes,SMA.Transient.g_bytes,sms_nbytes";;
 	memmove)	VVARS="SMA.s0.c_bytes,SMA.s0.c_freed,SMA.Transient.c_bytes,SMA.Transient.c_freed,sms_balloc,sms_bfree";;
