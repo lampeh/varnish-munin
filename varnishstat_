@@ -410,7 +410,7 @@ elif [ "$1" = "config" ]; then
 			cat <<-_EOF_
 				graph_title Varnish - Lock activity
 				graph_category varnish
-				graph_vlabel moved events / \${graph_period}
+				graph_vlabel events / \${graph_period}
 			_EOF_
 			$VSTAT -1|sed -e 's/^LCK\.\([^.]*\)\.\([a-z]*\) *\([0-9][0-9]*\) *[0-9.]* \(.*\)/\1_\2.label \1 \4\n\1_\2.draw LINE1\n\1_\2.type DERIVE\n\1_\2.min 0/;t;d'
 			;;
