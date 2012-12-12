@@ -415,6 +415,15 @@ elif [ "$1" = "config" ]; then
 			$VSTAT -1|sed -e 's/^LCK\.\([^.]*\)\.\([a-z]*\) *\([0-9][0-9]*\) *[0-9.]* \(.*\)/\1_\2.label \1 \4\n\1_\2.draw LINE1\n\1_\2.type DERIVE\n\1_\2.min 0/;t;d'
 			;;
 
+		bans)
+			cat <<-_EOF_
+				graph_title Varnish - Ban activity
+				graph_category varnish
+				graph_vlabel events / \${graph_period}
+			_EOF_
+			$VSTAT -1|sed -e 's/^n_ban_\([a-z]*\) *\([0-9][0-9]*\) *[0-9.]* N \(.*\)/\1.label \3\n\1.draw LINE1\n\1.type DERIVE/;t;d'
+			;;
+
 		*)
 			cat <<-_EOF_
 				graph_title Varnish - $VTYPE
@@ -454,6 +463,10 @@ case "$VTYPE" in
 	memalloc)	VVARS="SMA.s0.c_req,SMA.s0.c_fail,SMA.Transient.c_req,SMA.Transient.c_fail,sms_nreq";;
 	locks)		{
 					$VSTAT -1|sed -e 's/^LCK\.\([^.]*\)\.\([a-z]*\) *\([0-9][0-9]*\) *[0-9.]* \(.*\)/\1_\2.value \3/;t;d'
+					exit 0;
+				};;
+	bans)		{
+					$VSTAT -1|sed -e 's/^n_ban_\([a-z]*\) *\([0-9][0-9]*\) *[0-9.]* N \(.*\)/\1.value \2/;t;d'
 					exit 0;
 				};;
 	*)			VVARS="$VTYPE";;
